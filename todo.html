@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List App</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table, th, td { border: 1px solid #ddd; }
+        th, td { padding: 10px; text-align: left; }
+        form { margin-bottom: 20px; }
+        input, textarea { padding: 10px; margin-bottom: 10px; width: 100%; }
+        button { padding: 10px; cursor: pointer; }
+        .actions { display: flex; gap: 10px; }
+    </style>
+</head>
+<body>
+    <h1>To-Do List</h1>
+
+    <!-- Add Task Form -->
+    <form id="taskForm">
+        <input type="text" id="title" placeholder="Task Title" required>
+        <textarea id="description" placeholder="Task Description"></textarea>
+        <button type="submit">Add Task</button>
+    </form>
+
+    <!-- Task List Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="taskList"></tbody>
+    </table>
+
+    <script>
+        // Initialize the task list from local storage
+        const taskList = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        // DOM Elements
+        const taskForm = document.getElementById('taskForm');
+        const taskListElement = document.getElementById('taskList');
+        const titleInput = document.getElementById('title');
+        const descriptionInput = document.getElementById('description');
+
+        // Render the task list
+        function renderTasks() {
+            taskListElement.innerHTML = ''; // Clear existing content
+            taskList.forEach((task, index) => {
+                const row = document.createElement('tr');
+
+                // Task Title and Description
+                row.innerHTML = `
+                    <td>${task.title}</td>
+                    <td>${task.description}</td>
+                    <td class="actions">
+                        <button onclick="editTask(${index})">Edit</button>
+                        <button onclick="deleteTask(${index})">Delete</button>
+                    </td>
+                `;
+                taskListElement.appendChild(row);
+            });
+        }
+
+        // Add a new task
+        taskForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const title = titleInput.value.trim();
+            const description = descriptionInput.value.trim();
+
+            if (title) {
+                taskList.push({ title, description });
+                localStorage.setItem('tasks', JSON.stringify(taskList)); // Save to local storage
+                renderTasks();
+                taskForm.reset(); // Clear the form
+            } else {
+                alert('Task title cannot be empty.');
+            }
+        });
+
+        // Delete a task
+        function deleteTask(index) {
+            taskList.splice(index, 1);
+            localStorage.setItem('tasks', JSON.stringify(taskList)); // Update local storage
+            renderTasks();
+        }
+
+        // Edit a task
+        function editTask(index) {
+            const task = taskList[index];
+            const newTitle = prompt('Edit Task Title:', task.title);
+            const newDescription = prompt('Edit Task Description:', task.description);
+
+            if (newTitle) {
+                taskList[index] = { title: newTitle.trim(), description: newDescription.trim() };
+                localStorage.setItem('tasks', JSON.stringify(taskList)); // Update local storage
+                renderTasks();
+            }
+        }
+
+        // Initial Render
+        renderTasks();
+    </script>
+</body>
+</html>
